@@ -1,9 +1,12 @@
 import streamlit as st
 import google.generativeai as genai
 
+# Configure Gemini API with a hardcoded key
+GEMINI_API_KEY = "YOUR_API_KEY_HERE"  # Replace with your actual API key
+
 # Configure Gemini API
-def configure_gemini(api_key):
-    genai.configure(api_key=api_key)
+def configure_gemini():
+    genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel('gemini-pro')
     return model
 
@@ -59,34 +62,28 @@ def main():
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
     
-    # API key input
-    api_key = st.sidebar.text_input("Enter your Gemini API key", type="password")
-    
-    if api_key:
-        try:
-            model = configure_gemini(api_key)
-            
-            # Chat interface
-            user_input = st.text_input("Ask me anything about agriculture:", key="user_input")
-            
-            if st.button("Send"):
-                if user_input:
-                    response = get_chatbot_response(model, user_input)
-                    st.session_state.chat_history.append(("user", user_input))
-                    st.session_state.chat_history.append(("bot", response))
-            
-            # Display chat history
-            for role, message in st.session_state.chat_history:
-                with st.container():
-                    if role == "user":
-                        st.markdown(f"**You:** {message}")
-                    else:
-                        st.markdown(f"**Agricultural Assistant:** {message}")
-                    st.markdown("---")
-        except Exception as e:
-            st.error(f"Error initializing the model: {str(e)}")
-    else:
-        st.warning("Please enter your Gemini API key in the sidebar to start chatting.")
+    try:
+        model = configure_gemini()
+        
+        # Chat interface
+        user_input = st.text_input("Ask me anything about agriculture:", key="user_input")
+        
+        if st.button("Send"):
+            if user_input:
+                response = get_chatbot_response(model, user_input)
+                st.session_state.chat_history.append(("user", user_input))
+                st.session_state.chat_history.append(("bot", response))
+        
+        # Display chat history
+        for role, message in st.session_state.chat_history:
+            with st.container():
+                if role == "user":
+                    st.markdown(f"**You:** {message}")
+                else:
+                    st.markdown(f"**Agricultural Assistant:** {message}")
+                st.markdown("---")
+    except Exception as e:
+        st.error(f"Error initializing the model: {str(e)}")
 
 if __name__ == "__main__":
     main()
